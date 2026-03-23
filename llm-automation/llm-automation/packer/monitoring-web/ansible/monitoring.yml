@@ -1,0 +1,208 @@
+- name: Install Prometheus + Grafana + Alloy on web server
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars/private.yml
+
+  tasks:
+    - name: Create Prometheus directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - /opt/prometheus
+        - /etc/prometheus
+        - /var/lib/prometheus
+
+    - name: Download Prometheus archive
+      ansible.builtin.get_url:
+        url: "https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.{{ prometheus_arch }}.tar.gz"
+        dest: "/tmp/prometheus-{{ prometheus_version }}.tar.gz"
+        mode: "0644"
+
+    - name: Extract Prometheus archive
+      ansible.builtin.unarchive:
+        src: "/tmp/prometheus-{{ prometheus_version }}.tar.gz"
+        dest: /opt/prometheus
+        remote_src: true
+        creates: "/opt/prometheus/prometheus-{{ prometheus_version }}.{{ prometheus_arch }}"
+
+    - name: Copy prometheus binary
+      ansible.builtin.copy:
+        src: "/opt/prometheus/prometheus-{{ prometheus_version }}.{{ prometheus_arch }}/prometheus"
+        dest: /usr/local/bin/prometheus
+        remote_src: true
+        mode: "0755"
+
+    - name: Copy promtool binary
+      ansible.builtin.copy:
+        src: "/opt/prometheus/prometheus-{{ prometheus_version }}.{{ prometheus_arch }}/promtool"
+        dest: /usr/local/bin/promtool
+        remote_src: true
+        mode: "0755"
+
+    - name: Create Prometheus config
+      ansible.builtin.copy:
+        dest: /etc/prometheus/prometheus.yml
+        mode: "0644"
+        content: |
+          global:
+            scrape_interval: 15s
+
+          scrape_configs:
+            - job_name: prometheus
+              static_configs:
+                - targets:
+                    - "localhost:9090"
+
+    - name: Create Prometheus systemd unit
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/prometheus.service
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Prometheus
+          Wants=network-online.target
+          After=network-online.target
+
+          [Service]
+          Type=simple
+          ExecStart=/usr/local/bin/prometheus \
+            --config.file=/etc/prometheus/prometheus.yml \
+            --storage.tsdb.path=/var/lib/prometheus \
+            --web.listen-address=127.0.0.1:9090 \
+            --web.enable-remote-write-receiver
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Start and enable Prometheus
+      ansible.builtin.systemd:
+        name: prometheus
+        daemon_reload: true
+        state: started
+        enabled: true
+
+    - name: Import Grafana GPG key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://rpm.grafana.com/gpg.key
+
+    - name: Add Grafana repo
+      ansible.builtin.copy:
+        dest: /etc/yum.repos.d/grafana.repo
+        mode: "0644"
+        content: |
+          [grafana]
+          name=grafana
+          baseurl=https://rpm.grafana.com
+          repo_gpgcheck=1
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://rpm.grafana.com/gpg.key
+          sslverify=1
+          sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+
+    - name: Install Grafana and Alloy
+      ansible.builtin.dnf:
+        name:
+          - grafana
+          - alloy
+        state: present
+        update_cache: true
+
+    - name: Create Grafana datasource directory
+      ansible.builtin.file:
+        path: /etc/grafana/provisioning/datasources
+        state: directory
+        mode: "0755"
+
+    - name: Add Prometheus datasource
+      ansible.builtin.copy:
+        dest: /etc/grafana/provisioning/datasources/prometheus.yml
+        mode: "0644"
+        content: |
+          apiVersion: 1
+
+          datasources:
+            - name: Prometheus
+              type: prometheus
+              url: http://localhost:9090
+              access: proxy
+              isDefault: true
+      notify: restart grafana
+
+    - name: Create Alloy config
+      ansible.builtin.copy:
+        dest: /etc/alloy/config.alloy
+        mode: "0644"
+        content: |
+          prometheus.exporter.unix "node" {}
+
+          prometheus.scrape "node" {
+            targets    = prometheus.exporter.unix.node.targets
+            forward_to = [prometheus.remote_write.prom.receiver]
+          }
+
+          prometheus.remote_write "prom" {
+            endpoint {
+              url = "http://127.0.0.1:9090/api/v1/write"
+            }
+          }
+      notify: restart alloy
+
+    - name: Start and enable Grafana
+      ansible.builtin.systemd:
+        name: grafana-server
+        state: started
+        enabled: true
+
+    - name: Start and enable Alloy
+      ansible.builtin.systemd:
+        name: alloy
+        state: started
+        enabled: true
+
+    - name: Install Docker
+      ansible.builtin.dnf:
+        name: docker
+        state: present
+        update_cache: true
+
+    - name: Start and enable Docker
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Add ec2-user to docker group
+      ansible.builtin.user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    - name: Run Open WebUI container
+      ansible.builtin.shell: |
+        docker rm -f open-webui || true
+        docker run -d \
+          --name open-webui \
+          --restart unless-stopped \
+          -p 8080:8080 \
+          -e OLLAMA_BASE_URLS="{{ llm_hosts | map('regex_replace', '^(.*)$', 'http://\\1:11434') | join(';') }}" \
+          -v open-webui:/app/backend/data \
+          ghcr.io/open-webui/open-webui:v0.8.6
+      changed_when: true
+
+  handlers:
+    - name: restart grafana
+      ansible.builtin.systemd:
+        name: grafana-server
+        state: restarted
+
+    - name: restart alloy
+      ansible.builtin.systemd:
+        name: alloy
+        state: restarted
