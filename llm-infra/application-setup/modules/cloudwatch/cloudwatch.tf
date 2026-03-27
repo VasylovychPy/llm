@@ -13,7 +13,7 @@ resource "aws_sns_topic_subscription" "email" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "rds_low_storage" {
-  alarm_name          = "[llm]-[${var.env}]-[db]-[high]-[storage]"
+  alarm_name          = "[llm]-[${var.env}]-[db]-[low]-[storage]"
   alarm_description   = "RDS free storage space is low"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = 5
@@ -22,18 +22,18 @@ resource "aws_cloudwatch_metric_alarm" "rds_low_storage" {
   namespace           = "AWS/RDS"
   period              = 60
   statistic           = "Average"
-  threshold           = 21474836480
+  threshold           = 5368709120
   treat_missing_data  = "breaching"
 
   dimensions = {
-    DBInstanceIdentifier = var.rds_instance_id
+    DBInstanceIdentifier = var.rds_instance_identifier
   }
 
   alarm_actions = [aws_sns_topic.cloudwatch_alerts.arn]
   ok_actions    = [aws_sns_topic.cloudwatch_alerts.arn]
 
   tags = merge(var.common_tags, {
-    Name = "llm-${var.env}-db-high-storage"
+    Name = "llm-${var.env}-db-low-storage"
   })
 }
 
@@ -51,7 +51,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {
   treat_missing_data  = "breaching"
 
   dimensions = {
-    DBInstanceIdentifier = var.rds_instance_id
+    DBInstanceIdentifier = var.rds_instance_identifier
   }
 
   alarm_actions = [aws_sns_topic.cloudwatch_alerts.arn]
@@ -63,7 +63,7 @@ resource "aws_cloudwatch_metric_alarm" "rds_high_cpu" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "rds_low_memory" {
-  alarm_name          = "[llm]-[${var.env}]-[db]-[high]-[memory]"
+  alarm_name          = "[llm]-[${var.env}]-[db]-[low]-[memory]"
   alarm_description   = "RDS freeable memory is low"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = 5
@@ -72,18 +72,18 @@ resource "aws_cloudwatch_metric_alarm" "rds_low_memory" {
   namespace           = "AWS/RDS"
   period              = 60
   statistic           = "Average"
-  threshold           = 536870912
+  threshold           = 134217728
   treat_missing_data  = "breaching"
 
   dimensions = {
-    DBInstanceIdentifier = var.rds_instance_id
+    DBInstanceIdentifier = var.rds_instance_identifier
   }
 
   alarm_actions = [aws_sns_topic.cloudwatch_alerts.arn]
   ok_actions    = [aws_sns_topic.cloudwatch_alerts.arn]
 
   tags = merge(var.common_tags, {
-    Name = "llm-${var.env}-db-high-memory"
+    Name = "llm-${var.env}-db-low-memory"
   })
 }
 

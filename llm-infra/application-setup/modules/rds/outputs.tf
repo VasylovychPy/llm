@@ -27,3 +27,7 @@ output "secret_arn" {
   description = "Secrets Manager ARN with DB credentials"
   value       = aws_secretsmanager_secret.rds.arn
 }
+
+output "rds_instance_identifier" {
+  value = aws_db_instance.postgres.identifier
+}

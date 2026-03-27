@@ -7,7 +7,7 @@ variable "sns_email" {
   type = string
 }
 
-variable "rds_instance_id" {
+variable "rds_instance_identifier" {
   type = string
 }
 

@@ -98,7 +98,7 @@ module "cloudwatch" {
 
   env = var.env
 
-  rds_instance_id = module.rds.db_instance_id
+  rds_instance_identifier = module.rds.rds_instance_identifier
   alb_arn_suffix  = module.alb.alb_arn_suffix
 
   sns_email = var.sns_email
