@@ -4,11 +4,11 @@ resource "aws_security_group" "alb" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "HTTPS from Internet"
-    from_port   = 443
-    to_port     = 443
+    description = "HTTP from Web"
+    from_port   = 80
+    to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    security_groups = [var.web_security_group_id]
   }
 
   egress {
@@ -26,10 +26,10 @@ resource "aws_security_group" "alb" {
 
 resource "aws_lb" "this" {
   name               = "${var.env}-alb"
-  internal           = false
+  internal           = true
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
-  subnets            = var.public_subnet_ids
+  subnets            = var.private_subnet_ids
 
   tags = merge(var.common_tags, {
     Name = "${var.env}-alb"
@@ -38,7 +38,7 @@ resource "aws_lb" "this" {
 
 resource "aws_lb_target_group" "this" {
   name        = "${var.env}-tg"
-  port        = 80
+  port        = 11434
   protocol    = "HTTP"
   target_type = "instance"
   vpc_id      = var.vpc_id
@@ -61,10 +61,8 @@ resource "aws_lb_target_group" "this" {
 
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.this.arn
-  port              = 443
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = var.certificate_arn
+  port              = 80
+  protocol          = "HTTP"
 
   default_action {
     type             = "forward"

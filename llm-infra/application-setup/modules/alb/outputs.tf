@@ -17,3 +17,11 @@ output "target_group_arn" {
 output "alb_zone_id" {
   value = aws_lb.this.zone_id
 }
+
+output "llm_alb_dns_name" {
+  value = aws_lb.this.dns_name
+}
+
+output "alb_arn_suffix" {
+  value = aws_lb.this.arn_suffix
+}

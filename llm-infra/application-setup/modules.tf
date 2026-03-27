@@ -1,8 +1,32 @@
+module "web" {
+  source = "./modules/web"
+
+  env        = var.env
+  vpc_id     = data.aws_vpc.existing.id
+  public_subnet_id = data.aws_subnets.public.ids[0]
+
+  monitoring_web_ami_id = var.web_ami_id
+  web_instance_type = var.web_instance_type
+  key_name      = aws_key_pair.tech_task.key_name
+  vpc_cidr   = data.aws_vpc.existing.cidr_block
+
+  my_ip_cidr = var.my_ip_cidr
+
+  llm_alb_dns = module.alb.alb_dns_name
+
+  bastion_security_group_id = module.bastion.bastion_security_group_id
+
+  common_tags = local.common_tags
+}
+
 module "dns" {
   source = "./modules/dns"
 
   env         = var.env
+  vpc_id      = data.aws_vpc.existing.id
   domain_name = var.domain_name
+  web_public_ip  = module.web.web_public_ip
+  web_private_ip = module.web.web_private_ip
   common_tags = local.common_tags
 }
 
@@ -12,10 +36,10 @@ module "alb" {
   env              = var.env
   common_tags      = local.common_tags
   vpc_id           = data.aws_vpc.existing.id
-  public_subnet_ids = data.aws_subnets.public.ids
+  private_subnet_ids = data.aws_subnets.private_asg.ids
+  web_security_group_id = module.web.web_security_group_id
 
-  certificate_arn  = module.dns.certificate_arn
-  health_check_path = "/"
+  health_check_path = "/api/tags"
 }
 
 module "bastion" {
@@ -49,7 +73,7 @@ module "asg" {
   ami_id                    = var.ami_id
   instance_type             = var.instance_type
   key_name                  = aws_key_pair.tech_task.key_name
-  user_data                 = file("${path.module}/user_data.sh")
+
 
   desired_capacity = var.asg_desired_capacity
   min_size         = var.asg_min_size
@@ -67,4 +91,18 @@ module "rds" {
   db_username = var.db_username
   db_name     = var.db_name
   common_tags = local.common_tags
+}
+
+module "cloudwatch" {
+  source = "./modules/cloudwatch"
+
+  env = var.env
+
+  rds_instance_id = module.rds.db_instance_id
+  alb_arn_suffix  = module.alb.alb_arn_suffix
+
+  sns_email = var.sns_email
+
+  common_tags = local.common_tags
+
 }

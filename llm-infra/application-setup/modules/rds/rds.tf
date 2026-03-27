@@ -5,7 +5,7 @@ resource "random_password" "db_password" {
 }
 
 resource "aws_secretsmanager_secret" "rds" {
-  name        = "${var.env}-rds-credentials"
+  name        = "${var.env}-rds-credentials-v2"
   description = "RDS PostgreSQL credentials for ${var.env}"
 
   tags = merge(var.common_tags, {

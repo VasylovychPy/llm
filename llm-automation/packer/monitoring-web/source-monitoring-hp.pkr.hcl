@@ -4,7 +4,7 @@ source "amazon-ebs" "monitoring-linux" {
   region        = "us-east-1"
   source_ami_filter {
     filters = {
-      name                = "al2023-ami-*-x86_64"
+      name                = "al2023-ami-2023.*-kernel-6.*-x86_64"
       root-device-type    = "ebs"
       virtualization-type = "hvm"
     }

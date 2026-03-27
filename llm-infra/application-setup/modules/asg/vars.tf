@@ -50,7 +50,3 @@ variable "target_group_arns" {
 variable "key_name" {
   type = string
 }
-
-variable "user_data" {
-  type = string
-}

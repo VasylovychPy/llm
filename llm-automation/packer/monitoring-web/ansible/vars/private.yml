@@ -1,6 +1,3 @@
 prometheus_version: "3.10.0"
 prometheus_arch: "linux-amd64"
-
-llm_hosts:
-  - "10.0.1.10"
-  - "10.0.1.11"
+domain_name : "birdswatching.pp.ua"

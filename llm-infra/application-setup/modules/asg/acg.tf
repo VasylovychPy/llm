@@ -13,8 +13,8 @@ resource "aws_security_group" "asg" {
   }
 
    ingress {
-    from_port       = 80
-    to_port         = 80
+    from_port       = 11434
+    to_port         = 11434
     protocol        = "tcp"
     security_groups = [var.alb_security_group_id]
   }
@@ -36,7 +36,17 @@ resource "aws_launch_template" "this" {
   image_id      = var.ami_id
   instance_type = var.instance_type
   key_name      = var.key_name
-  user_data = base64encode(var.user_data)
+
+ block_device_mappings {
+  device_name = "/dev/xvda"
+
+  ebs {
+    volume_size = 20
+    volume_type = "gp3"
+    delete_on_termination = true
+  }
+}
+
 
   vpc_security_group_ids = [aws_security_group.asg.id]
 

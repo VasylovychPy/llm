@@ -9,3 +9,16 @@ variable "env" {
 variable "common_tags" {
   type = map(string)
 }
+
+variable "web_public_ip" {
+  type = string
+}
+
+variable "web_private_ip" {
+  type = string
+  
+}
+
+variable "vpc_id" {
+  type = string
+}

@@ -10,15 +10,16 @@ variable "vpc_id" {
   type = string
 }
 
-variable "public_subnet_ids" {
+variable "private_subnet_ids" {
   type = list(string)
-}
-
-variable "certificate_arn" {
-  type = string
 }
 
 variable "health_check_path" {
   type    = string
   default = "/"
+}
+
+variable "web_security_group_id" {
+  type = string
+  
 }

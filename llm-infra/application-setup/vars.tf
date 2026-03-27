@@ -58,6 +58,17 @@ variable "my_ip_cidr" {
   type = string
 }
 
+variable "web_ami_id" {
+  type = string
+}
+
+variable "web_instance_type" {
+  type = string
+}
+
+variable "sns_email" {
+  type = string
+}
 
 
 

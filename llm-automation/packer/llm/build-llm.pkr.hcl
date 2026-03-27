@@ -2,8 +2,7 @@ build {
     name = "llm-ami"
     sources = ["source.amazon-ebs.llm-linux"]
 
-    provisioner "shell" {
-        script = "scripts/ollama-setup.sh"
+    provisioner "ansible" {
+        playbook_file = "ansible/llm.yml"
     }
-
 }

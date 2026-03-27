@@ -26,11 +26,10 @@
           sslverify=1
           sslcacert=/etc/pki/tls/certs/ca-bundle.crt
 
-    - name: Install Alloy and curl
+    - name: Install Alloy
       ansible.builtin.dnf:
         name:
           - alloy
-          - curl
         state: present
         update_cache: true
 
@@ -61,9 +60,25 @@
         content: |
           prometheus.exporter.unix "node" {}
 
+          prometheus.relabel "node" {
+            forward_to = [prometheus.remote_write.prom.receiver]
+
+            rule {
+              action       = "replace"
+              target_label = "instance"
+              replacement  = constants.hostname
+            }
+
+            rule {
+              action       = "replace"
+              target_label = "job"
+              replacement  = "integrations/unix"
+            }
+          }
+
           prometheus.scrape "node" {
             targets    = prometheus.exporter.unix.node.targets
-            forward_to = [prometheus.remote_write.prom.receiver]
+            forward_to = [prometheus.relabel.node.receiver]
           }
 
           prometheus.remote_write "prom" {
@@ -85,6 +100,9 @@
         name: alloy
         state: started
         enabled: true
+
+    - name: Pull Ollama model
+      ansible.builtin.shell: ollama pull llama3.2:3b    
 
   handlers:
     - name: restart ollama

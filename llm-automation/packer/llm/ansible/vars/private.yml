@@ -1,2 +1,2 @@
-prometheus_remote_write_url: "http://10.0.2.10:9090/api/v1/write"
+prometheus_remote_write_url: "http://10.0.0.52:9090/api/v1/write"
 ollama_host: "0.0.0.0:11434"
