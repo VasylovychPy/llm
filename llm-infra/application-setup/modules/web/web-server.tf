@@ -82,6 +82,11 @@ resource "aws_instance" "web" {
 
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
   llm_alb_dns = var.llm_alb_dns
+    db_endpoint = var.db_endpoint
+    db_port     = var.db_port
+    db_name     = var.db_name
+    db_username = var.db_username
+    db_password = var.db_password
 }))
 
   tags = merge(var.common_tags, {

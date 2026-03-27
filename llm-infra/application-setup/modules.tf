@@ -14,6 +14,12 @@ module "web" {
 
   llm_alb_dns = module.alb.alb_dns_name
 
+  db_endpoint = module.rds.db_endpoint
+  db_port     = module.rds.db_port
+  db_name     = module.rds.db_name
+  db_username = module.rds.db_username
+  db_password = var.db_password
+
   bastion_security_group_id = module.bastion.bastion_security_group_id
 
   common_tags = local.common_tags
@@ -86,11 +92,13 @@ module "rds" {
   env                    = var.env
   vpc_id                 = data.aws_vpc.existing.id
   private_rds_subnet_ids = data.aws_subnets.private_rds.ids
-  asg_security_group_id  = module.asg.asg_security_group_id
+  web_security_group_id  = module.web.web_security_group_id
 
   db_username = var.db_username
   db_name     = var.db_name
+  db_password = var.db_password
   common_tags = local.common_tags
+
 }
 
 module "cloudwatch" {

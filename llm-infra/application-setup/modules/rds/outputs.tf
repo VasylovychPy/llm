@@ -3,16 +3,6 @@ output "db_instance_id" {
   value       = aws_db_instance.postgres.id
 }
 
-output "db_endpoint" {
-  description = "RDS endpoint"
-  value       = aws_db_instance.postgres.address
-}
-
-output "db_port" {
-  description = "RDS port"
-  value       = aws_db_instance.postgres.port
-}
-
 output "db_security_group_id" {
   description = "Security group for RDS"
   value       = aws_security_group.rds.id
@@ -30,4 +20,25 @@ output "secret_arn" {
 
 output "rds_instance_identifier" {
   value = aws_db_instance.postgres.identifier
+}
+
+output "db_endpoint" {
+  value = aws_db_instance.postgres.address
+}
+
+output "db_port" {
+  value = aws_db_instance.postgres.port
+}
+
+output "db_name" {
+  value = aws_db_instance.postgres.db_name
+}
+
+output "db_username" {
+  value = aws_db_instance.postgres.username
+}
+
+output "db_password" {
+  value     = random_password.db_password.result
+  sensitive = true
 }

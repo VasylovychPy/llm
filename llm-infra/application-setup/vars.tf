@@ -69,6 +69,8 @@ variable "web_instance_type" {
 variable "sns_email" {
   type = string
 }
-
+ variable "db_password" {
+   type = string
+ }
 
 

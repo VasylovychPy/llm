@@ -32,7 +32,7 @@ resource "aws_security_group" "rds" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [var.asg_security_group_id]
+    security_groups = [var.web_security_group_id]
   }
 
   egress {
@@ -58,7 +58,7 @@ resource "aws_db_instance" "postgres" {
   vpc_security_group_ids = [aws_security_group.rds.id]
 
   username            = var.db_username
-  password            = random_password.db_password.result
+  password            = var.db_password
   db_name             = var.db_name
   publicly_accessible = false
 

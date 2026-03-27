@@ -18,7 +18,7 @@ variable "private_rds_subnet_ids" {
   type = list(string)
 }
 
-variable "asg_security_group_id" {
+variable "web_security_group_id" {
     description = "Security groups that allows traffic"
   type = string
 }
@@ -30,5 +30,9 @@ variable "db_username" {
 
 variable "db_name" {
     description = "Name of Database"
+  type = string
+}
+
+variable "db_password" {
   type = string
 }

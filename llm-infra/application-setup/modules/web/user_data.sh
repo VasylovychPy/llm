@@ -8,5 +8,6 @@ docker run -d \
   --restart unless-stopped \
   -p 8080:8080 \
   -e OLLAMA_BASE_URL="http://${llm_alb_dns}" \
+  -e DATABASE_URL="postgresql://${db_username}:${db_password}@${db_endpoint}:${db_port}/${db_name}" \
   -v open-webui:/app/backend/data \
   ghcr.io/open-webui/open-webui:main-slim
