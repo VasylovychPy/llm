@@ -86,18 +86,40 @@
         state: started
         enabled: true
 
-    - name: Install Grafana from RPM
-      ansible.builtin.dnf:
-        name: https://dl.grafana.com/grafana/release/12.4.1/grafana_12.4.1_22846628243_linux_amd64.rpm
+    - name: Import Grafana GPG key
+      ansible.builtin.rpm_key:
         state: present
-        disable_gpg_check: true
+        key: https://rpm.grafana.com/gpg.key
 
-    - name: Install Alloy from RPM
+    - name: Add Grafana repo
+      ansible.builtin.copy:
+        dest: /etc/yum.repos.d/grafana.repo
+        mode: "0644"
+        content: |
+          [grafana]
+          name=grafana
+          baseurl=https://rpm.grafana.com
+          repo_gpgcheck=1
+          enabled=1
+          gpgcheck=1
+          gpgkey=https://rpm.grafana.com/gpg.key
+          sslverify=1
+          sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+
+    - name: Install Alloy
       ansible.builtin.dnf:
-        name: https://github.com/grafana/alloy/releases/download/v1.14.2/alloy-1.14.2-1.amd64.rpm
+        name:
+          - alloy
         state: present
-        disable_gpg_check: true
-    
+        update_cache: true
+
+    - name: Install Grafana
+      ansible.builtin.dnf:
+        name:
+          - grafana
+        state: present
+        update_cache: true    
+ 
     - name: Create Grafana datasource directory
       ansible.builtin.file:
         path: /etc/grafana/provisioning/datasources
@@ -110,7 +132,6 @@
         mode: "0644"
         content: |
           apiVersion: 1
-
           datasources:
             - name: Prometheus
               type: prometheus
@@ -126,9 +147,25 @@
         content: |
           prometheus.exporter.unix "node" {}
 
+          prometheus.relabel "node" {
+            forward_to = [prometheus.remote_write.prom.receiver]
+
+            rule {
+              action       = "replace"
+              target_label = "instance"
+              replacement  = "web-server"
+            }
+
+            rule {
+              action       = "replace"
+              target_label = "job"
+              replacement  = "integrations/unix"
+            }
+          }
+
           prometheus.scrape "node" {
             targets    = prometheus.exporter.unix.node.targets
-            forward_to = [prometheus.remote_write.prom.receiver]
+            forward_to = [prometheus.relabel.node.receiver]
           }
 
           prometheus.remote_write "prom" {
@@ -163,37 +200,36 @@
         enabled: true
 
     - name: Install nginx
-  ansible.builtin.dnf:
-    name: nginx
-    state: present
+      ansible.builtin.dnf:
+        name: nginx
+        state: present
 
-- name: Configure nginx for OpenWebUI
-  ansible.builtin.copy:
-    dest: /etc/nginx/conf.d/openwebui.conf
-    mode: "0644"
-    content: |
-      server {
-          listen 80;
-          server_name {{ domain_name }};
+    - name: Configure nginx for OpenWebUI
+      ansible.builtin.copy:
+        dest: /etc/nginx/conf.d/openwebui.conf
+        mode: "0644"
+        content: |
+          server {
+              listen 80;
+              server_name {{ domain_name }};
 
-          location / {
-              proxy_pass http://localhost:8080;
-              proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
+              location / {
+                  proxy_pass http://localhost:8080;
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
 
-              proxy_http_version 1.1;
-              proxy_set_header Upgrade $http_upgrade;
-              proxy_set_header Connection "upgrade";
+                  proxy_http_version 1.1;
+                  proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection "upgrade";
+              }
           }
-      }
-  notify: restart nginx
+      notify: restart nginx
 
-- name: Enable and start nginx
-  ansible.builtin.systemd:
-    name: nginx
-    enabled: true
-    state: started
-
+    - name: Enable and start nginx
+      ansible.builtin.systemd:
+        name: nginx
+        enabled: true
+        state: started
 
   handlers:
     - name: restart grafana
@@ -208,5 +244,5 @@
 
     - name: restart nginx
       ansible.builtin.systemd:
-       name: nginx
-       state: restarted       
+        name: nginx
+        state: restarted

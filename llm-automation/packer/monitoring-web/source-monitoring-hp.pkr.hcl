@@ -1,6 +1,6 @@
 source "amazon-ebs" "monitoring-linux" {
-  ami_name      = "monitoring-linux"
-  instance_type = "t3.micro"
+  ami_name      = "monitoring-linux-v2"
+  instance_type = "t3.medium"
   region        = "us-east-1"
   source_ami_filter {
     filters = {
@@ -11,6 +11,14 @@ source "amazon-ebs" "monitoring-linux" {
     most_recent = true
     owners      = ["137112412989"]
   }
+
+  launch_block_device_mappings {
+    device_name           = "/dev/xvda"
+    volume_size           = 20
+    volume_type           = "gp3"
+    delete_on_termination = true
+  }
+
   ssh_username = "ec2-user"
 
 }

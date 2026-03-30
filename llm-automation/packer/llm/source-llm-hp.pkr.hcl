@@ -1,5 +1,5 @@
 source "amazon-ebs" "llm-linux" {
-  ami_name      = "llm-linux-model"
+  ami_name      = "llm-linux-model-v2"
   instance_type = "t3.medium"
   region        = "us-east-1"
   source_ami_filter {
