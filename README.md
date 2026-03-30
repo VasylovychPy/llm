@@ -1,6 +1,6 @@
-# 🚀 LLM Infrastructure on AWS (Terraform + Terragrunt + Packer + Ansible)
+# LLM Infrastructure on AWS (Terraform + Terragrunt + Packer + Ansible)
 
-## 📖 Overview
+## Overview
 
 This project implements a production-like AWS infrastructure for running LLM services (Ollama) with a complete monitoring and alerting stack.
 
@@ -17,7 +17,7 @@ The infrastructure is built using a **layered Terraform architecture**:
 
 ---
 
-## 🏗 Architecture
+##  Architecture
 
 ### 🔹 Core Flow
 
@@ -31,7 +31,7 @@ LLM Instances → Alloy → Prometheus → Grafana
 
 ---
 
-## 🧱 Infrastructure Layers
+##  Infrastructure Layers
 
 The project is divided into **three logical layers**:
 
@@ -68,7 +68,7 @@ Deploys application components:
 
 ---
 
-## ⚙️ AMI Strategy (Packer + Ansible)
+## AMI Strategy (Packer + Ansible)
 
 The infrastructure uses **custom AMIs** built with Packer and configured via Ansible.
 
@@ -94,13 +94,13 @@ Includes:
 
 ---
 
-## 🛠 AMI Build Process
+## AMI Build Process
 
 Custom AMIs must be built before deploying the application layer.
 
 Packer creates immutable images, and Ansible configures them during build time.
 
-### 🔹 Build Web AMI
+### Build Web AMI
 
 ```bash
 cd llm-automation/packer/monitoring-web
@@ -109,7 +109,7 @@ packer validate .
 packer build .
 ```
 
-### 🔹 Build LLM AMI
+### Build LLM AMI
 
 ```bash
 cd llm-automation/packer/llm
@@ -118,7 +118,7 @@ packer validate .
 packer build .
 ```
 
-### 🔹 Notes
+### Notes
 
 - Web AMI contains full monitoring stack + Nginx
 - LLM AMI contains Ollama + metrics agent
@@ -126,13 +126,13 @@ packer build .
 
 ---
 
-## ⚙️ Deployment Options
+##  Deployment Options
 
 You can deploy infrastructure in two ways:
 
 ---
 
-### 🔹 Option 1: Makefile (Terraform)
+### Option 1: Makefile (Terraform)
 
 Each layer can be deployed independently.
 
@@ -168,7 +168,7 @@ terragrunt run-all apply
 
 ---
 
-## 📊 Monitoring
+## Monitoring
 
 ### 🔹 Stack
 
@@ -176,7 +176,7 @@ terragrunt run-all apply
 - Grafana
 - Grafana Alloy
 
-### 🔹 Metrics Flow
+### Metrics Flow
 
 ```text
 LLM → Alloy → Prometheus → Grafana
@@ -184,27 +184,27 @@ LLM → Alloy → Prometheus → Grafana
 
 ---
 
-## 🚨 Alerting
+## Alerting
 
-### 🔹 Grafana Alerts
+### Grafana Alerts
 
 - Instance down
 - High CPU usage
 - Low disk space
 
-### 🔹 CloudWatch Alerts
+### CloudWatch Alerts
 
 - RDS (CPU, storage)
 - ALB (4xx / 5xx)
 
-### 🔹 Notifications
+### Notifications
 
 - SNS → Email
 - Grafana → Slack
 
 ---
 
-## 🗄 Database (RDS PostgreSQL)
+## Database (RDS PostgreSQL)
 
 Used by:
 
@@ -218,7 +218,7 @@ Stores:
 
 ---
 
-## 🔐 Security
+## Security
 
 - LLM instances run in private subnets
 - No public access to Ollama
@@ -230,7 +230,7 @@ Stores:
 
 ---
 
-## 🧠 Key Design Decisions
+## Key Design Decisions
 
 - Layered Terraform architecture
 - Immutable infrastructure via AMIs
