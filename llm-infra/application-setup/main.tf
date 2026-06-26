@@ -11,7 +11,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket       = "llm-vasylovych-2026"
+    bucket       = "llm-vasylovych-2026-v3"
     region       = "us-east-1"
     key          = "application-setup/llm.tfstate"
     encrypt      = true

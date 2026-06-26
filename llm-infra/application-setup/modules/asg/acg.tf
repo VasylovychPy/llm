@@ -36,6 +36,9 @@ resource "aws_launch_template" "this" {
   image_id      = var.ami_id
   instance_type = var.instance_type
   key_name      = var.key_name
+  user_data = base64encode(templatefile("${path.module}/user_data.sh", {
+  prometheus_remote_write_url = var.prometheus_remote_write_url
+}))
 
  block_device_mappings {
   device_name = "/dev/xvda"

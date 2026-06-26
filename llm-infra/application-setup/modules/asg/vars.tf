@@ -50,3 +50,7 @@ variable "target_group_arns" {
 variable "key_name" {
   type = string
 }
+
+variable "prometheus_remote_write_url" {
+  type        = string
+}
