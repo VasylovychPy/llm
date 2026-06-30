@@ -12,7 +12,7 @@ resource "aws_security_group" "asg" {
     security_groups = [var.bastion_security_group_id]
   }
 
-   ingress {
+  ingress {
     from_port       = 11434
     to_port         = 11434
     protocol        = "tcp"
@@ -37,18 +37,18 @@ resource "aws_launch_template" "this" {
   instance_type = var.instance_type
   key_name      = var.key_name
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
-  prometheus_remote_write_url = var.prometheus_remote_write_url
-}))
+    prometheus_remote_write_url = var.prometheus_remote_write_url
+  }))
 
- block_device_mappings {
-  device_name = "/dev/xvda"
+  block_device_mappings {
+    device_name = "/dev/xvda"
 
-  ebs {
-    volume_size = 20
-    volume_type = "gp3"
-    delete_on_termination = true
+    ebs {
+      volume_size           = 20
+      volume_type           = "gp3"
+      delete_on_termination = true
+    }
   }
-}
 
 
   vpc_security_group_ids = [aws_security_group.asg.id]
@@ -68,7 +68,7 @@ resource "aws_autoscaling_group" "this" {
   min_size            = var.min_size
   max_size            = var.max_size
   vpc_zone_identifier = var.private_asg_subnet_ids
-  target_group_arns = var.target_group_arns
+  target_group_arns   = var.target_group_arns
 
   launch_template {
     id      = aws_launch_template.this.id

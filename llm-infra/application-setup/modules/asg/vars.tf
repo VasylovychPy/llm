@@ -39,8 +39,8 @@ variable "max_size" {
 }
 
 variable "alb_security_group_id" {
-    type = string
-  
+  type = string
+
 }
 
 variable "target_group_arns" {
@@ -52,5 +52,5 @@ variable "key_name" {
 }
 
 variable "prometheus_remote_write_url" {
-  type        = string
+  type = string
 }

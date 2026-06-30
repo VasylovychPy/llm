@@ -21,5 +21,5 @@ variable "health_check_path" {
 
 variable "web_security_group_id" {
   type = string
-  
+
 }

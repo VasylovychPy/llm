@@ -1,6 +1,6 @@
 
 variable "env" {
-  type    = string
+  type = string
 }
 
 variable "sns_email" {

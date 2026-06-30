@@ -9,6 +9,6 @@ resource "aws_key_pair" "tech_task" {
 
 resource "local_file" "private_key" {
   content         = tls_private_key.this.private_key_openssh
-  filename             = "${path.module}/.keys/tech-task-key"
+  filename        = "${path.module}/.keys/tech-task-key"
   file_permission = "0400"
 }

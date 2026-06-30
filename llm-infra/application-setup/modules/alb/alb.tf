@@ -4,10 +4,10 @@ resource "aws_security_group" "alb" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "HTTP from Web"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
+    description     = "HTTP from Web"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
     security_groups = [var.web_security_group_id]
   }
 

@@ -20,17 +20,17 @@ variable "vpc_name" {
 
 variable "asg_desired_capacity" {
   type = number
-  
+
 }
 
 variable "asg_max_size" {
   type = number
-  
+
 }
 
 variable "asg_min_size" {
   type = number
-  
+
 }
 
 variable "ami_id" {
@@ -69,8 +69,8 @@ variable "web_instance_type" {
 variable "sns_email" {
   type = string
 }
- variable "db_password" {
-   type = string
- }
+variable "db_password" {
+  type = string
+}
 
 

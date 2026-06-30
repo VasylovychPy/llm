@@ -4,19 +4,19 @@ resource "aws_security_group" "web" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "SSH from my Bastion"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+    description     = "SSH from my Bastion"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
     security_groups = [var.bastion_security_group_id]
   }
 
   ingress {
-  from_port   = 80
-  to_port     = 80
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-}
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   ingress {
     description = "Open WebUI"
@@ -35,10 +35,10 @@ resource "aws_security_group" "web" {
   }
 
   ingress {
-    description     = "Prometheus remote write from LLM SG"
-    from_port       = 9090
-    to_port         = 9090
-    protocol        = "tcp"
+    description = "Prometheus remote write from LLM SG"
+    from_port   = 9090
+    to_port     = 9090
+    protocol    = "tcp"
     cidr_blocks = [var.vpc_cidr]
   }
 
@@ -76,18 +76,18 @@ resource "aws_instance" "web" {
   associate_public_ip_address = true
 
   root_block_device {
-  volume_size = 20
-  volume_type = "gp3"
-}
+    volume_size = 20
+    volume_type = "gp3"
+  }
 
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
-  llm_alb_dns = var.llm_alb_dns
+    llm_alb_dns = var.llm_alb_dns
     db_endpoint = var.db_endpoint
     db_port     = var.db_port
     db_name     = var.db_name
     db_username = var.db_username
     db_password = var.db_password
-}))
+  }))
 
   tags = merge(var.common_tags, {
     Name = "${var.env}-web"
